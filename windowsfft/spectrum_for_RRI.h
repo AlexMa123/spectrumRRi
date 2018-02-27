@@ -28,7 +28,6 @@
 class SpectrumForRRI
 {
     private:
-
         /*
          *  about RRI
          */
@@ -77,6 +76,11 @@ class SpectrumForRRI
         double *apnea_event;
         TGraph *show_apnea;
         TGraph *ave_apnea;
+        // 
+        vector< vector<double> > apneastart;
+        vector< vector<double> > apneaend;
+        vector< vector<double> > breathstart;
+        vector< vector<double> > breathend;
     public:
         SpectrumForRRI(std::string filepath,int freq,int window_size, int overflap);
         /*
@@ -85,7 +89,6 @@ class SpectrumForRRI
          * windows_size : num of samples included in one window
          * overlap  : num of samples overlap between two windows
          */
-
         /*
          *  methods for cal new RRI
          */
@@ -104,7 +107,6 @@ class SpectrumForRRI
         double *get_RR_position(){return R_R_position;}
         double *get_resample_t(){return resample_t;}
         double *get_new_RRI(){return newRRI;}
-
         /*
          * methods for windows FFT
         */
@@ -117,6 +119,11 @@ class SpectrumForRRI
         TH2D *get_spectrum(){return spectrum;}
         int get_total_number(){return num_of_frequency;}
         void cal_apnea(std::string filename, char c = ';');
+        void cal_around_apnea(std::string filename, char c = ';');
+        vector< vector <double> > get_apnea_start_vec(){return apneastart;}
+        vector< vector<double> > get_apnea_end_vec(){return apneaend;}
+        vector< vector<double> > get_breathing_start_vec(){return apneaend;}
+        vector< vector<double> > get_breathing_end_vec(){return apneaend;}
         TGraph *get_apnea(){
             return show_apnea;
         }
@@ -125,5 +132,11 @@ class SpectrumForRRI
         }
         virtual ~SpectrumForRRI();
 };
+
+
+double mean_value(vector<double> values);
+double mean_value(double *values, int size);
+double std_dev(vector<double> values);
+double std_dev(double *values, int size);
 
 #endif /* SPECTRUM_FOR_RRI_H */
