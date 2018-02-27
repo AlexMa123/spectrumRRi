@@ -106,6 +106,9 @@ class ReadCSV
         int get_colume(){
             return strArray.size();
         }
+        int get_line(){
+            return strArray[0].size();
+        }
         virtual ~ReadCSV();
 };
 /**********************************************************************
