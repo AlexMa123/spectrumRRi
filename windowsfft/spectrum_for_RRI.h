@@ -11,7 +11,7 @@
  *       Compiler:  gcc
  *
  *         Author:  Yaopeng Ma (), sdumyp@126.com
- *   Organization:  
+ *   Organization:
  *
  * =====================================================================================
  */
@@ -76,11 +76,16 @@ class SpectrumForRRI
         double *apnea_event;
         TGraph *show_apnea;
         TGraph *ave_apnea;
-        // 
+        //
         vector< vector<double> > apneastart;
         vector< vector<double> > apneaend;
         vector< vector<double> > breathstart;
         vector< vector<double> > breathend;
+
+        vector< vector<double> > apneastart_one;
+        vector< vector<double> > apneaend_one;
+        vector< vector<double> > breathstart_one;
+        vector< vector<double> > breathend_one;
     public:
         SpectrumForRRI(std::string filepath,int freq,int window_size, int overflap);
         /*
@@ -109,7 +114,7 @@ class SpectrumForRRI
         double *get_new_RRI(){return newRRI;}
         /*
          * methods for windows FFT
-        */
+         */
         void apply_FFT(int i,bool dofft = kTRUE,bool save = kFALSE);
         void cal_spectrum();
         void draw_fft_now();
@@ -122,8 +127,13 @@ class SpectrumForRRI
         void cal_around_apnea(std::string filename, char c = ';');
         vector< vector <double> > get_apnea_start_vec(){return apneastart;}
         vector< vector<double> > get_apnea_end_vec(){return apneaend;}
-        vector< vector<double> > get_breathing_start_vec(){return apneaend;}
-        vector< vector<double> > get_breathing_end_vec(){return apneaend;}
+        vector< vector<double> > get_breathing_start_vec(){return breathstart;}
+        vector< vector<double> > get_breathing_end_vec(){return breathend;}
+
+        vector< vector <double> > get_apnea_start_one_vec(){return apneastart_one;}
+        vector< vector<double> > get_apnea_end_one_vec(){return apneaend_one;}
+        vector< vector<double> > get_breathing_start_one_vec(){return breathstart_one;}
+        vector< vector<double> > get_breathing_end_one_vec(){return breathend_one;}
         TGraph *get_apnea(){
             return show_apnea;
         }
