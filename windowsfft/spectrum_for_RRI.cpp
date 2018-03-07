@@ -236,9 +236,11 @@ void SpectrumForRRI::cal_band(){
     apply_FFT(0,kFALSE);
     int b_start, b_end, a_start, a_end;
     b_start = br_fr_start / frequency_fft[1] + 1;
-    b_end   = br_fr_end   / frequency_fft[1] + 1;
+    b_end   = br_fr_end   / frequency_fft[1] ;
     a_start = ap_fr_start / frequency_fft[1] + 1;
-    a_end   = ap_fr_end   / frequency_fft[1] + 1;
+    a_end   = ap_fr_end   / frequency_fft[1] ;
+    std::cout << "apnea band : " << frequency_fft[a_start] <<" to " << frequency_fft[a_end] << std::endl;
+    std::cout << "breathing band " << frequency_fft[b_start] << " to " << frequency_fft[b_end] << std::endl;
     double frac = 1 / (double)frequency;
     double sum_br = 0;
     double sum_ap = 0;
@@ -307,16 +309,16 @@ void SpectrumForRRI::cal_apnea(std::string filename, char c){
         for(int j = 0; j < idur; j++)
             apnea_event[istart + j] = 1;
     }
-    for(i = 0; i < Ap_event.get_number_of_hypopnea(); i++){
-        int hyp_start   = Ap_event.get_hypopnea_starttime(i);
-        hyp_start       = hyp_start - starttime ;
-        double duration = Ap_event.get_hypopnea_duration(i);
-        int idur        = (int)((double)duration*(double)frequency);
-        int istart      = hyp_start*frequency;
-        for (int j = 0; j < idur; j++) {
-            apnea_event[istart + j] = 0.5;
-        }
-    }
+    /* for(i = 0; i < Ap_event.get_number_of_hypopnea(); i++){ */
+    /*     int hyp_start   = Ap_event.get_hypopnea_starttime(i); */
+    /*     hyp_start       = hyp_start - starttime ; */
+    /*     double duration = Ap_event.get_hypopnea_duration(i); */
+    /*     int idur        = (int)((double)duration*(double)frequency); */
+    /*     int istart      = hyp_start*frequency; */
+    /*     for (int j = 0; j < idur; j++) { */
+    /*         apnea_event[istart + j] = 0.5; */
+    /*     } */
+    /* } */
     show_apnea = new TGraph(total_num_after_resample, resample_t, apnea_event);
     show_apnea->SetTitle("apnea events");
     show_apnea->GetXaxis()->SetTitle("time/s");
@@ -358,6 +360,7 @@ void SpectrumForRRI::cal_around_apnea(std::string filename, char c){
         int num = apnea->GetN();
         double *y1 = apnea->GetY();
         double *y2 = breathing->GetY();
+        double *t1 = apnea->GetX();
         time_one = apnea->GetX()[0];
         time_delta = apnea->GetX()[1] - apnea->GetX()[0];
         int num_events = 0;
@@ -367,6 +370,7 @@ void SpectrumForRRI::cal_around_apnea(std::string filename, char c){
             double apnea_start = ap_event.get_apnea_starttime(i);
             apnea_start -= starttime;
             double apnea_end = apnea_start + ap_event.get_apnea_duration(i);
+            std::cout << "apnea start at "<< apnea_start << " ; end at " << apnea_end << std::endl;
             for(int m = 0 ; m < ap_event.get_number_of_apnea(); m++){
                 if(abs(ap_event.get_apnea_starttime(i) - ap_event.get_apnea_starttime(m)) < (windowsize / frequency)){
                     num_events ++ ;
@@ -374,10 +378,12 @@ void SpectrumForRRI::cal_around_apnea(std::string filename, char c){
             }
             if(apnea_end + 10 <= apnea->GetX()[num - 1]){
                 num_of_apnea ++ ;
-                int istart = ((apnea_start - 10) - time_one) / time_delta;
-                int iend   = ((apnea_start + 10) - time_one) / time_delta;
-                int jstart = ((apnea_end - 10) - time_one) / time_delta;
-                int jend   = ((apnea_end + 10) - time_one) / time_delta;
+                int istart = ((apnea_start - 10.0) - time_one) / time_delta;
+                int iend   = ((apnea_start + 10.0) - time_one) / time_delta;
+                int jstart = ((apnea_end - 10.0) - time_one) / time_delta;
+                int jend   = ((apnea_end + 10.0) - time_one) / time_delta;
+                std::cout << "in band, time is " <<t1[istart] << ":" <<t1[iend] <<" and "
+                    <<t1[jstart] << " : " << t1[jend]<< std::endl;
                 if(i == 0){
                     apneastart.resize(iend - istart + 1);
                     apneaend.resize(jend - jstart + 1);
@@ -463,7 +469,7 @@ double std_dev(vector<double> values){
         sum += values[i] * values[i];
     }
     double ave = mean_value(values);
-    return TMath::Sqrt(sum / values.size() - ave * ave)/TMath::Sqrt(values.size());
+    return TMath::Sqrt(sum / (values.size() - 1) - ave * ave * values.size()/(values.size()-1));
 }
 double std_dev(double *values, int size){
     int i;
@@ -472,6 +478,12 @@ double std_dev(double *values, int size){
         sum += values[i] * values[i];
     }
     double ave = mean_value(values, size);
-    return TMath::Sqrt(sum / size +  ave*ave)/TMath::Sqrt(size);
+    return TMath::Sqrt(sum / (size - 1) +  ave*ave * size/(size - 1));
+}
+double std_err(vector<double> values){
+    return std_dev(values) / TMath::Sqrt(values.size());
 }
 
+double std_err(double *values, int size){
+    return std_dev(values, size) / TMath::Sqrt(size);
+}

@@ -64,13 +64,13 @@ void draw_apnea_start_and_end(std::string file){
 
     for(unsigned int i  = 0; i < apnea_end.size(); ++i){
         ap_start[i]     = mean_value(apnea_start[i]);
-        ap_start_er[i]  = std_dev(apnea_start[i]);
+        ap_start_er[i]  = std_err(apnea_start[i]);
         ap_end[i]       = mean_value(apnea_end[i]);
-        ap_end_er[i]    = std_dev(apnea_end[i]);
+        ap_end_er[i]    = std_err(apnea_end[i]);
         br_start[i]     = mean_value(breath_start[i]);
-        br_start_er[i]  = std_dev(apnea_start[i]);
+        br_start_er[i]  = std_err(apnea_start[i]);
         br_end[i]       = mean_value(breath_end[i]);
-        br_end_er[i]    = std_dev(apnea_end[i]);
+        br_end_er[i]    = std_err(apnea_end[i]);
     }
 
     TCanvas *mycanva = new TCanvas("canva","around apnea",800,600);
@@ -154,13 +154,13 @@ void draw_apnea_one_start_and_end(std::string file){
 
     for(unsigned int i  = 0; i < apnea_end.size(); ++i){
         ap_start[i]     = mean_value(apnea_start[i]);
-        ap_start_er[i]  = std_dev(apnea_start[i]);
+        ap_start_er[i]  = std_err(apnea_start[i]);
         ap_end[i]       = mean_value(apnea_end[i]);
-        ap_end_er[i]    = std_dev(apnea_end[i]);
+        ap_end_er[i]    = std_err(apnea_end[i]);
         br_start[i]     = mean_value(breath_start[i]);
-        br_start_er[i]  = std_dev(apnea_start[i]);
+        br_start_er[i]  = std_err(apnea_start[i]);
         br_end[i]       = mean_value(breath_end[i]);
-        br_end_er[i]    = std_dev(apnea_end[i]);
+        br_end_er[i]    = std_err(apnea_end[i]);
     }
 
     TCanvas *mycanva = new TCanvas("canva","around apnea",800,600);

@@ -20,4 +20,5 @@
     gROOT->ProcessLine(".L csvfiles/Read_CSV.cpp+");
     gROOT->ProcessLine(".L windowsfft/spectrum_for_RRI.cpp+");
     gROOT->ProcessLine(".L utility/my_functions.cpp+");
+    gROOT->ProcessLine(".L utility/draw.cpp+");
 }

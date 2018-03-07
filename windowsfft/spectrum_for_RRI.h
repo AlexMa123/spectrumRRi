@@ -148,5 +148,7 @@ double mean_value(vector<double> values);
 double mean_value(double *values, int size);
 double std_dev(vector<double> values);
 double std_dev(double *values, int size);
+double std_err(vector<double> values);
+double std_dev(double *values, int size);
 
 #endif /* SPECTRUM_FOR_RRI_H */
