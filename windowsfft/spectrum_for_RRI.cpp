@@ -88,9 +88,8 @@ void SpectrumForRRI::read_data(){
     in >> delta_time;
     in >> line;
     double factor = 1.0/1000.0;
-    R_R_interval[0] = R_R_position[0] = 0;
-    R_R_interval[1] = R_R_position[1] = delta_time*factor;
-    for(int i = 2; i < num_of_RR_peaks + 1; i++){
+    R_R_interval[0] = R_R_position[0] = delta_time*factor;
+    for(int i = 1; i < num_of_RR_peaks ; i++){
         in >> delta_time;
         in >> line;
         R_R_interval[i] = delta_time*factor;
@@ -100,7 +99,7 @@ void SpectrumForRRI::read_data(){
 }
 
 void SpectrumForRRI::cal_resample_time(){
-    double endtime = R_R_position[num_of_RR_peaks];
+    double endtime = R_R_position[num_of_RR_peaks - 1];
     int nn = endtime * frequency;
     time_distance = 1./(double)frequency;
     total_num_after_resample = nn;
@@ -144,9 +143,6 @@ double SpectrumForRRI::cal_value_at_t(double t, int istart){
        line function : y = k(t - t0) + y0;
        k = (y1 - y0) / (x1 - x0)
        */
-    if(istart == 0){
-        return t;
-    }
     double slope = (R_R_interval[istart + 1] - R_R_interval[istart]);
     slope = slope / (R_R_interval[istart + 1]);
     double cal_value = slope * (t - R_R_position[istart]) + R_R_interval[istart];
@@ -194,6 +190,7 @@ void SpectrumForRRI::apply_FFT(int i, bool dofft, bool save){
             power_spectrum[i] = (re*re+im*im)/n;
             log_of_spectrum[i] = TMath::Log(power_spectrum[i]);
         }
+        power_spectrum[n/2 - 1] /= 2;
         delete myfft;
     }
 }
@@ -264,7 +261,7 @@ void SpectrumForRRI::cal_band(){
         for (j = a_start; j <= a_end; j++) {
             sum_ap += power_spectrum[j];
         }
-        for (j = 1; j < num_of_frequency; ++j) {
+        for (j = 1; j < num_of_frequency; j++) {
             sum_all += power_spectrum[j];
         }
         br[i]   = sum_br / sum_all;

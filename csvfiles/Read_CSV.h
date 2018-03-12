@@ -130,6 +130,12 @@ class Event: private ReadCSV{
     private:
         vector<double> apnea_starttime;
         vector<double> apnea_duration;
+        vector<double> apnea_central_starttime;
+        vector<double> apnea_central_duration;
+        vector<double> apnea_mixed_starttime;
+        vector<double> apnea_mixed_duration;
+        vector<double> apnea_obstructive_duration;
+        vector<double> apnea_obstructive_starttime;
         vector<double> hypopnea_starttime;
         vector<double> hypopnea_duration;
 
