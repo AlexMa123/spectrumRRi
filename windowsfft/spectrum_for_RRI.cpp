@@ -408,6 +408,7 @@ void SpectrumForRRI::cal_around_apnea(std::string filename, char c){
                         breathstart_one[j - istart].push_back(y2[j]);
                     }
                     apneastart[j - istart][i] = y1[j];
+                    std::cout << apneastart[j - istart][i] <<" " << y1[j] << std::endl;
                     breathstart[j - istart][i] = y2[j];
                 }
                 for(int j = jstart; j <= jend; j++){
@@ -451,7 +452,9 @@ double mean_value(vector<double> values){
     double sum = 0;
     for (i = 0; i < values.size(); ++i) {
         sum += values[i];
+        cout << values[i] << " ";
     }
+    cout << endl;
     return sum/values.size();
 }
 double mean_value(double *values, int size){
