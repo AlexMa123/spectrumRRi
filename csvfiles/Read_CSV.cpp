@@ -68,6 +68,15 @@ double str2num(string str){
     return out;
 }
 
+mytime second_to_time(int second){
+    if(second >= 24 * 3600)
+        second -= 24 * 3600;
+    int hour = second / 3600;
+    int minuit = (second - hour * 3600) / 60;
+    int sec = second - hour * 3600 - minuit * 60;
+    return mytime(hour, minuit, sec);
+}
+
 mytime str2time(string str){
     int h, m, s;
     char c;
@@ -139,3 +148,4 @@ double Event::get_hypopnea_duration(int i){
     }
     return hypopnea_duration[i];
 }
+

@@ -232,10 +232,15 @@ void SpectrumForRRI::cal_band(){
     double *ap   = new double[windows_num - 1];
     apply_FFT(0,kFALSE);
     int b_start, b_end, a_start, a_end;
-    b_start = br_fr_start / frequency_fft[1] + 1;
+    b_start = br_fr_start / frequency_fft[1] ;
     b_end   = br_fr_end   / frequency_fft[1] ;
-    a_start = ap_fr_start / frequency_fft[1] + 1;
+    a_start = ap_fr_start / frequency_fft[1] ;
     a_end   = ap_fr_end   / frequency_fft[1] ;
+    if (a_start == 0) {
+        a_start ++ ;
+    }
+    std::cout << b_start << " " << b_end << std::endl;
+    std::cout << a_start << " " << a_end << std::endl;
     std::cout << "apnea band : " << frequency_fft[a_start] <<" to " << frequency_fft[a_end] << std::endl;
     std::cout << "breathing band " << frequency_fft[b_start] << " to " << frequency_fft[b_end] << std::endl;
     double frac = 1 / (double)frequency;
@@ -296,14 +301,13 @@ void SpectrumForRRI::cal_band(){
 void SpectrumForRRI::cal_apnea(std::string filename, char c){
     Event Ap_event(filename, c);
     int i = 0;
-    int num_of_apnea;
     for(i = 0; i < Ap_event.get_number_of_apnea(); i++){
         int apnea_start = Ap_event.get_apnea_starttime(i);
         apnea_start     = apnea_start - starttime ;
         double duration = Ap_event.get_apnea_duration(i);
         int idur        = (int)((double)duration*(double)frequency);
         int istart      = apnea_start*frequency;
-        for(int j = 0; j < idur; j++)
+        for(int j = 0; j <= idur; j++)
             apnea_event[istart + j] = 1;
     }
     /* for(i = 0; i < Ap_event.get_number_of_hypopnea(); i++){ */
@@ -324,16 +328,12 @@ void SpectrumForRRI::cal_apnea(std::string filename, char c){
     double *average = new double[windows_num - 1];
     double frac = 1 / (double)frequency;
     for(int i = 0; i < windows_num-1; i++){
-        num_of_apnea = 0;
         int windows_start = i * (windowsize - over);
         average[i] = 0;
         time[i] = (double)(i * (windowsize - over) + windowsize/2);
         time[i] *= frac;
         for(int j = 0; j < windowsize; j++){
             average[i] += apnea_event[windows_start + j];
-            if (apnea_event[windows_start + j] == 1 && apnea_event[windows_start+j+1] == 0) {
-                num_of_apnea ++;
-            }
         }
         //        std::cout << "windows " << i+1 << " has " << num_of_apnea <<" apneas" << std::endl;
         average[i] = average[i] / windowsize;
@@ -346,14 +346,15 @@ void SpectrumForRRI::cal_apnea(std::string filename, char c){
 
 void SpectrumForRRI::cal_around_apnea(std::string filename, char c){
     Event ap_event(filename, c);
-    double time_one;
-    double time_delta;
     int num_of_apnea = 0;
     vector<double> bre_start;
     vector<double> bre_end;
     vector<double> apn_start;
     vector<double> apn_end;
     if(apnea != NULL){
+        double time_one;
+        double time_delta;
+
         int num = apnea->GetN();
         double *y1 = apnea->GetY();
         double *y2 = breathing->GetY();
@@ -362,12 +363,12 @@ void SpectrumForRRI::cal_around_apnea(std::string filename, char c){
         time_delta = apnea->GetX()[1] - apnea->GetX()[0];
         int num_events = 0;
         int pos = 0;
-//        std::cout << ap_event.get_number_of_apnea() << std::endl;
+        //        std::cout << ap_event.get_number_of_apnea() << std::endl;
         for(int i = 0 ; i < ap_event.get_number_of_apnea(); i++){
             double apnea_start = ap_event.get_apnea_starttime(i);
             apnea_start -= starttime;
             double apnea_end = apnea_start + ap_event.get_apnea_duration(i);
-            std::cout << i << "th apnea start at "<< apnea_start << " duration " << apnea_end - apnea_start << std::endl;
+            //std::cout << i << "th apnea start at "<< apnea_start << " duration " << apnea_end - apnea_start << std::endl;
             for(int m = 0 ; m < ap_event.get_number_of_apnea(); m++){
                 if(abs(ap_event.get_apnea_starttime(i) - ap_event.get_apnea_starttime(m)) < (windowsize / frequency)){
                     num_events ++ ;
@@ -375,12 +376,14 @@ void SpectrumForRRI::cal_around_apnea(std::string filename, char c){
             }
             if(apnea_end + 10 <= apnea->GetX()[num - 1]){
                 num_of_apnea ++ ;
+                /**********************************************************************
+                 *  - time_one is because that: 1 st windows, time = 512 / 4 = 128 s  *
+                 **********************************************************************/
+
                 int istart = ((apnea_start - 10.0) - time_one) / time_delta;
                 int iend   = ((apnea_start + 10.0) - time_one) / time_delta;
                 int jstart = ((apnea_end - 10.0) - time_one) / time_delta;
                 int jend   = ((apnea_end + 10.0) - time_one) / time_delta;
-                /* std::cout << "in band, time is " <<t1[istart] << ":" <<t1[iend] <<" and " */
-                /*     <<t1[jstart] << " : " << t1[jend]<< std::endl; */
                 if(i == 0){
                     apneastart.resize(iend - istart + 1);
                     apneaend.resize(jend - jstart + 1);

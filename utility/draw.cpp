@@ -35,20 +35,23 @@ void draw_apnea(string filename,double tstart = 0, double tend = 0){
     string datafile = "/Users/apple/Desktop/data/" + filename + " - events.csv";
     string rrifile = "/Users/apple/workspace/Bar_Ilan/specturm_RRI/somno/" + filename + ".rri";
     SpectrumForRRI *myrrihand = new SpectrumForRRI(rrifile, 4, 1024, 1020);
+    std::cout << "1" << std::endl;
     myrrihand->cal_apnea(datafile);
     myrrihand->cal_band();
+    std::cout << "2" << std::endl;
     if(tstart != tend){
         myrrihand->get_apnea_band()->GetXaxis()->SetRangeUser(tstart,tend);
         myrrihand->get_breathing_band()->GetXaxis()->SetRangeUser(tstart,tend);
         myrrihand->get_apnea()->GetXaxis()->SetRangeUser(tstart,tend);
     }
-    c->cd(1);
-    myrrihand->get_apnea_band()->Draw("AL");
     c->cd(2);
+    myrrihand->get_apnea_band()->Draw("AL");
+    c->cd(1);
     myrrihand->get_breathing_band()->Draw("AL");
     c->cd(3);
     myrrihand->get_apnea()->Draw("AL");
     gPad->Update();
+    c->SaveAs((filename + "_apnea.pdf").c_str());
 }
 
 void draw_same(string filename,bool ave = false, double tstart = 0, double tend = 0){

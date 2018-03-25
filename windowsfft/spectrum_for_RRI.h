@@ -72,7 +72,6 @@ class SpectrumForRRI
         /*
          *  end band
          */
-        int starttime;
         double *apnea_event;
         TGraph *show_apnea;
         TGraph *ave_apnea;
@@ -87,6 +86,7 @@ class SpectrumForRRI
         vector< vector<double> > breathstart_one;
         vector< vector<double> > breathend_one;
     public:
+        int starttime;
         SpectrumForRRI(std::string filepath,int freq,int window_size, int overflap);
         /*
          * filepath : the path of rri file

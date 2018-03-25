@@ -11,7 +11,7 @@
  *       Compiler:  gcc
  *
  *         Author:  Yaopeng Ma (), sdumyp@126.com
- *   Organization:  
+ *   Organization:
  *
  * =====================================================================================
  */
@@ -20,14 +20,18 @@
 #include <vector>
 #include <TGraph.h>
 #include <TGraphErrors.h>
+#include <TMultiGraph.h>
+#include <TLatex.h>
 #include <TCanvas.h>
+#include <TPaveText.h>
 #include <TAxis.h>
 #include <TLegend.h>
 #include "../windowsfft/spectrum_for_RRI.h"
+#include "../csvfiles/Read_CSV.h"
 
 using std::vector;
 
-void draw_apnea_start_and_end(std::string file){
+TCanvas* draw_apnea_start_and_end(std::string file, bool savefile = kFALSE){
     std::string rrifile = "/Users/apple/workspace/Bar_Ilan/specturm_RRI/somno/" + file + ".rri";
     std::string csvfile = "/Users/apple/Desktop/data/" + file + " - events.csv";
     SpectrumForRRI myspectrum(rrifile, 4, 1024, 1020);
@@ -74,8 +78,8 @@ void draw_apnea_start_and_end(std::string file){
     }
 
     TCanvas *mycanva = new TCanvas("canva","around apnea",800,600);
-    mycanva->cd();
-    TLegend *leg = new TLegend(0.8,0.8,0.95,0.9);
+    mycanva->Divide(0, 2, 0, 0);
+    mycanva->cd(1);
     double x[6] = {-10, 0, 0, 10, 10, 30};
     double y[6] = {0, 0, 1, 1, 0, 0};
     double x2[4] = {10, 10, 20, 20};
@@ -86,35 +90,54 @@ void draw_apnea_start_and_end(std::string file){
     TGraphErrors *gr_ap_end   = new TGraphErrors(N, t2, ap_end, 0, ap_end_er);
     TGraphErrors *gr_br_start = new TGraphErrors(N, t1, br_start,0 , br_start_er);
     TGraphErrors *gr_br_end   = new TGraphErrors(N, t2, br_end, 0, br_end_er);
+    TMultiGraph *gr_ap = new TMultiGraph();
+    TMultiGraph *gr_br = new TMultiGraph();
 
-    leg->AddEntry(gr_ap_start,"apnea band","pl");
-    leg->AddEntry(gr_br_start, "breathing band","pl");
-    leg->AddEntry(gr_ap_end, "apnea band","pl");
-    leg->AddEntry(gr_br_end, "breathing band","pl");
 
     gr_ap_start->SetMarkerStyle(26);
     gr_br_start->SetMarkerStyle(22);
     gr_ap_end->SetMarkerStyle(32);
     gr_br_end->SetMarkerStyle(23);
 
+    gr_ap_start->SetMarkerColor(kRed);
+    gr_ap_end->SetMarkerColor(kBlue);
+    gr_ap_start->SetLineColor(kRed);
+    gr_ap_end->SetLineColor(kBlue);
+
+    gr_ap->SetTitle("apnea; time/s");
+
+    gr_br_start->SetMarkerColor(kRed);
+    gr_br_end->SetMarkerColor(kBlue);
+    gr_br_start->SetLineColor(kRed);
+    gr_br_end->SetLineColor(kBlue);
+
+    gr_ap->Add(gr_ap_start);
+    gr_ap->Add(gr_ap_end);
+    gr_br->Add(gr_br_end);
+    gr_br->Add(gr_br_start);
+    gr_br->SetTitle("breathing; time/s");
+
     TGraph *shadow_start = new TGraph(6, x, y);
     TGraph *shadow_end = new TGraph(4, x2, y2);
 
-    shadow_start->SetTitle(file.c_str());
+    gr_ap_start->SetTitle(file.c_str());
 
     shadow_start->SetFillColorAlpha(kRed, 0.3);
     shadow_start->GetXaxis()->SetTitle("time/s");
     shadow_start->GetXaxis()->CenterTitle();
-    shadow_start->GetXaxis()->SetRangeUser(-11,31);
-    shadow_start->GetYaxis()->SetRangeUser(0,1);
     shadow_end->SetFillColorAlpha(kBlue, 0.3);
-    shadow_start->Draw("AF");
+    gr_ap->Draw("APL");
+    shadow_start->Draw("F");
     shadow_end->Draw("F");
-    gr_ap_start->Draw("PL");
-    gr_ap_end->Draw("PL");
-    gr_br_start->Draw("PL");
-    gr_br_end->Draw("PL");
-    leg->Draw();
+
+    mycanva->cd(2);
+    gr_br->Draw("ALP");
+    shadow_start->Draw("F");
+    shadow_end->Draw("F");
+    if(savefile)
+        mycanva->SaveAs( (file + ".pdf").c_str() );
+
+    return mycanva;
 }
 
 void draw_apnea_one_start_and_end(std::string file){
@@ -175,7 +198,7 @@ void draw_apnea_one_start_and_end(std::string file){
     TGraphErrors *gr_ap_end   = new TGraphErrors(N, t2, ap_end, 0, ap_end_er);
     TGraphErrors *gr_br_start = new TGraphErrors(N, t1, br_start,0 , br_start_er);
     TGraphErrors *gr_br_end   = new TGraphErrors(N, t2, br_end, 0, br_end_er);
-    TLegend *leg = new TLegend(0.8,0.8,0.95,0.9);
+    TLegend *leg = new TLegend(0.7, 0.7, 1, 1);
 
     gr_ap_start->SetMarkerStyle(26);
     gr_br_start->SetMarkerStyle(22);
@@ -204,4 +227,20 @@ void draw_apnea_one_start_and_end(std::string file){
     gr_br_start->Draw("PL");
     gr_br_end->Draw("PL");
     leg->Draw();
+}
+void print_info(TGraph *apnea_band, int starttime){
+    int N = apnea_band->GetN();
+    double *y = apnea_band->GetY();
+    double *x = apnea_band->GetX();
+    int i;
+    int time_start = 0;
+    for (i = 0; i < N; ++i) {
+        if(y[i] == 1 && y[i - 1] == 0){
+            time_start = x[i];
+            second_to_time(time_start + starttime).print();
+        }
+        if(y[i] == 1 && y[i + 1] == 0){
+            printf(" %f \n",x[i] - time_start);
+        }
+    }
 }

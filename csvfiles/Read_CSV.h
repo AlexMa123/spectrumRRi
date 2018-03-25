@@ -43,11 +43,8 @@ struct mytime{
     int get_total_second(){
         return hour*3600 + minuit*60 + second;
     }
-    mytime &operator = (mytime & t){
-        hour = t.hour;
-        minuit = t.minuit;
-        second = t.second;
-        return *this;
+    void print(){
+        printf("%2d:%2d:%2d",hour, minuit, second);
     }
     mytime operator + (mytime & t){
         int s, m, h;
@@ -121,6 +118,7 @@ class ReadCSV
 
 double str2num(string str);
 mytime str2time(string str);
+mytime second_to_time(int second);
 
 /**********************************************************************
 *             class for reading event file to get apnea              *
